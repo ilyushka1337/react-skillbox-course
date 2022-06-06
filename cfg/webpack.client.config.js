@@ -1,32 +1,56 @@
 const path = require('path')
+const webpack = require('webpack')
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const ReactRefreshTypeScript = require('react-refresh-typescript');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 const NODE_ENV = process.env.NODE_ENV
 const IS_DEV = NODE_ENV === 'development'
-const IS_PROD = NODE_ENV === 'production'
 
-function setupDevtool(){
-    if (IS_DEV) return 'source-map'
-    if (IS_PROD) return false
-}
+const devEntries = [
+    path.resolve(__dirname, '../src/client/index.jsx'),
+    'webpack-hot-middleware/client?path=http://localhost:3001/static/__webpack__hmr&quiet=true'
+]
+const prodEntries = [
+    path.resolve(__dirname, '../src/client/index.jsx'),
+]
 
 module.exports = {
     mode: NODE_ENV ? NODE_ENV : 'development',
     stats: 'minimal',
-    entry: path.resolve(__dirname, '../src/client/index.jsx'),
+    entry: IS_DEV ? devEntries : prodEntries,
     output: {
         path: path.resolve(__dirname, '../dist/client'),
-        filename: 'client.js'
+        publicPath: "/static/",
+        filename: 'client.js',
     },
     module: {
         rules: [
             {
                 test: /.[tj]sx?$/,
-                use: ['ts-loader']
+                use: [
+                    {
+                        loader: require.resolve('ts-loader'),
+                        options: {
+                            getCustomTransformers: () => ({
+                                before: [IS_DEV && ReactRefreshTypeScript()].filter(Boolean),
+                            }),
+                            transpileOnly: IS_DEV,
+                        },
+                    }
+                ]
             }
         ]
     },
     resolve: {
         extensions: ['.js', '.jsx', '.ts', '.tsx', '.json']
     },
-    devtool: setupDevtool()
+    plugins: IS_DEV ? [
+        new webpack.HotModuleReplacementPlugin(),
+        new ReactRefreshWebpackPlugin(),
+        new CleanWebpackPlugin({
+            cleanOnceBeforeBuildPatterns: ['*.hot-update.*']
+        })
+    ] : [],
+    devtool: 'source-map'
 }
