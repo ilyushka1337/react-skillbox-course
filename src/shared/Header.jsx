@@ -1,9 +1,10 @@
 import React from 'react'
+import styles from './header.scss'
 
 export default function Header() {
   return (
     <header>
-        <h1>Reddit for our own 123 321</h1>
+        <h1 className={styles.title}>Hello React</h1>
     </header>
   )
 }
