@@ -1,8 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client';
-import Header from '../shared/Header.jsx'
-
+import App from '../App'
 
 window.addEventListener('load', () => {
-    const root = ReactDOM.hydrateRoot(document.getElementById('root'), <Header></Header>);
+    const root = ReactDOM.hydrateRoot(document.getElementById('root'), <App />);
 })

@@ -6,6 +6,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 const NODE_ENV = process.env.NODE_ENV
 const IS_DEV = NODE_ENV === 'development'
+const globalCssRegExp = /\.global\.scss$/i
 
 const devEntries = [
     path.resolve(__dirname, '../src/client/index.jsx'),
@@ -23,6 +24,7 @@ module.exports = {
         path: path.resolve(__dirname, '../dist/client'),
         publicPath: "/static/",
         filename: 'client.js',
+        assetModuleFilename: '[name][ext]'
     },
     module: {
         rules: [
@@ -54,12 +56,28 @@ module.exports = {
                         }
                     },
                     'sass-loader'
+                ],
+                exclude: globalCssRegExp
+            },
+            {
+                test: globalCssRegExp,
+                use: [
+                    'style-loader',
+                    'css-loader',
+                    'sass-loader'
                 ]
-            }
+            },
+            {
+                test: /\.(png|svg|jpg|jpeg|gif)$/i,
+                type: 'asset/resource',
+            },
         ]
     },
     resolve: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx', '.json']
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
+        alias: {
+            Assets: path.resolve(__dirname, '../src/assets')
+        }
     },
     plugins: IS_DEV ? [
         new webpack.HotModuleReplacementPlugin(),
